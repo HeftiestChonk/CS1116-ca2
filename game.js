@@ -4,6 +4,7 @@
 let canvas;
 let context;
 
+let request;
 let fpsInterval = 1000 / 30; // the denominator is frames-per-second
 let now;
 let then = Date.now();
@@ -55,17 +56,17 @@ let moveDown = false;
 
 // Defining an enemy sprite + position
 let enemy = {
-    x: randint(0, 200),
-    y: randint(0, 100),
+    x: randint(30, 492),
+    y: randint(30, 300),
     width: 24,
     height: 24,
     frameX: 0,
     frameY: 0,
-    xChange: randint(-10, 10),
-    yChange: randint(-10, 10),
+    xChange: randint(-5, 5),
+    yChange: randint(-5, 5),
 };
 
-let enemyImage = new Image();
+let enemyImage1 = new Image();
 
 
 document.addEventListener("DOMContentLoaded", init, false);
@@ -74,6 +75,7 @@ function init() {
     canvas = document.querySelector("canvas");
     context = canvas.getContext("2d");
 
+    // Spawning the player
     player.x = canvas.width / 2;
     player.y = canvas.height / 2;
     
@@ -81,13 +83,19 @@ function init() {
     window.addEventListener("keyup", deactivate, false);
     
     load_assets([
-        {"var": playerImage, "url": "Free Character Sprites 2 - Fantasy Dreamland/24x24/Char_008.png"},
-        {"var": enemyImage, "url": "Free Character Sprites 2 - Fantasy Dreamland/24x24/Char_011.png"},
-        {"var": backgroundImage, "url": "Dungeon_Tileset.png"}], draw);
+        {"var": playerImage, "url": "Free Character Sprites 2 - Fantasy Dreamland/24x24/Char_008.png"}, // Player moving sprite
+        {"var": enemyImage1, "url": "Free Character Sprites 2 - Fantasy Dreamland/24x24/Char_011.png"}, // Enemy moving sprite
+        {"var": backgroundImage, "url": "Dungeon_Tileset.png"}], draw); // Background tileset
 }
 
+// defining the empty space in the sprites
+let empty = {
+    x: 6,
+    y: 4
+};
+
 function draw() {
-    window.requestAnimationFrame(draw);
+    request = window.requestAnimationFrame(draw);
     let now = Date.now();
     let elapsed = now - then;
     if (elapsed <= fpsInterval) {
@@ -145,18 +153,18 @@ function draw() {
     player.y = player.y + player.yChange;
 
     // Draw Enemies
-    context.drawImage(enemyImage,
+    context.drawImage(enemyImage1,
         enemy.frameX * enemy.width, enemy.frameY * enemy.height, enemy.width, enemy.height, 
         enemy.x, enemy.y, enemy.width, enemy.height);
 
-    if (enemy.x+ enemy.width > canvas.width){
+    if (enemy.x + enemy.width >= canvas.width){
         enemy.xChange = enemy.xChange * (-1)
-    } else if (enemy.x < 0){
+    } else if (enemy.x <= 0){
         enemy.xChange = enemy.xChange * (-1)
     }
-    if (enemy.y+enemy.height > canvas.height){
+    if (enemy.y+enemy.height >= canvas.height){
         enemy.yChange = enemy.yChange * (-1)
-    } else if (enemy.y < 0){
+    } else if (enemy.y <= 0){
         enemy.yChange = enemy.yChange * (-1)
     }
 
@@ -177,6 +185,8 @@ function draw() {
     if (enemy.yChange > 0) {
         enemy.frameY = 0
     }
+
+    enemy.frameX = (enemy.frameX + 1) % 4;
 
     // Update the enemy
     enemy.x = enemy.x + enemy.xChange;
@@ -202,7 +212,7 @@ function draw() {
 
     // Player getting hit be the enemy
     if (is_colliding(player, enemy)) {
-        stop();
+        stop("YOU LOSE!");
         return;
     }
 
@@ -270,18 +280,23 @@ function randint(min, max) {
 }
 
 function is_colliding(object1, object2) {
-    if (object1.x + object1.width < object2.x ||
-        object2.x + object2.width < object1.x ||
-        object1.y > object2.y + object2.height ||
-        object2.y > object1.y + object1.height) {
+    if (object1.x + object1.width - empty.x < object2.x + empty.x ||
+        object2.x + object2.width - empty.x < object1.x + empty.x ||
+        object1.y + empty.y > object2.y + object2.height - empty.y ||
+        object2.y + empty.y > object1.y + object1.height - empty.y) {
             return false;
         } else {
             return true;
         }
 }
 
-function stop() {
+function stop(outcome) {
     window.cancelAnimationFrame(request);
     window.removeEventListener("keydown", activate);
     window.removeEventListener("keyup", deactivate);
+    let body = document.querySelector("body");
+    let endCondition = document.createElement("p");
+    endCondition.innerHTML = outcome;
+    endCondition.id = "endCondition";
+    body.appendChild(endCondition);
 }
