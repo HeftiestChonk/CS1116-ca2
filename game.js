@@ -57,7 +57,7 @@ let moveDown = false;
 // Defining an enemy sprite + position
 let enemy = {
     x: randint(30, 492),
-    y: randint(30, 300),
+    y: randint(30, 290),
     width: 24,
     height: 24,
     frameX: 0,
@@ -68,6 +68,19 @@ let enemy = {
 
 let enemyImage1 = new Image();
 
+// Defining a tracking enemy
+let enemyT = {
+    x: randint(30, 492),
+    y: randint(30, 300),
+    width: 24,
+    height: 24,
+    frameX: 0,
+    frameY: 0,
+    xChange: 0,
+    yChange: 0,
+};
+
+let enemyImage2 = new Image();
 
 document.addEventListener("DOMContentLoaded", init, false);
 
@@ -85,6 +98,7 @@ function init() {
     load_assets([
         {"var": playerImage, "url": "Free Character Sprites 2 - Fantasy Dreamland/24x24/Char_008.png"}, // Player moving sprite
         {"var": enemyImage1, "url": "Free Character Sprites 2 - Fantasy Dreamland/24x24/Char_011.png"}, // Enemy moving sprite
+        {"var": enemyImage2, "url": "Free Character Sprites 2 - Fantasy Dreamland/24x24/Char_010.png"}, // EnemyT moving sprite
         {"var": backgroundImage, "url": "Dungeon_Tileset.png"}], draw); // Background tileset
 }
 
@@ -153,10 +167,12 @@ function draw() {
     player.y = player.y + player.yChange;
 
     // Draw Enemies
+    // Draw straight line enemy
     context.drawImage(enemyImage1,
         enemy.frameX * enemy.width, enemy.frameY * enemy.height, enemy.width, enemy.height, 
         enemy.x, enemy.y, enemy.width, enemy.height);
 
+    // enemy movement
     if (enemy.x + enemy.width >= canvas.width){
         enemy.xChange = enemy.xChange * (-1)
     } else if (enemy.x <= 0){
@@ -192,6 +208,63 @@ function draw() {
     enemy.x = enemy.x + enemy.xChange;
     enemy.y = enemy.y + enemy.yChange;
 
+    // Draw tracking enemy
+    context.drawImage(enemyImage2,
+        enemyT.frameX * enemyT.width, enemyT.frameY * enemyT.height, enemyT.width, enemyT.height, 
+        enemyT.x, enemyT.y, enemyT.width, enemyT.height);
+
+    // Tracking enemy movement
+    if (player.x > enemyT.x){
+        enemyT.xChange = 1;
+    } else if (player.x < enemyT.x){
+        enemyT.xChange = -1;
+    } else if (player.x === enemyT.x){
+        enemyT.xChange = 0
+    }
+    if (player.y > enemyT.y){
+        enemyT.yChange = 1;
+    } else if (player.y < enemyT.y){
+        enemyT.yChange = -1;
+    } else if (player.y === enemyT.y){
+        enemyT.yChange = 0
+    }
+
+    // changing the direction the enemy faces
+    // Left
+    if (enemyT.xChange < 0) {
+        enemyT.frameY = 1;
+    }
+    // Right
+    if (enemyT.xChange > 0) {
+        enemyT.frameY = 2;
+    }
+    // Up
+    if (enemyT.yChange < 0) {
+        enemyT.frameY = 3
+    }
+    // Down
+    if (enemyT.yChange > 0) {
+        enemyT.frameY = 0
+    }
+
+    enemyT.frameX = (enemyT.frameX + 1) % 4;
+
+    // Update the enemy
+    enemyT.x = enemyT.x + enemyT.xChange;
+    enemyT.y = enemyT.y + enemyT.yChange;
+
+    // Tracking enemy colliding with a wall
+    if (enemyT.x + enemyT.width >= canvas.width){
+        enemyT.x = canvas.width - enemyT.width
+    } else if (enemyT.x <= 0){
+        enemyT.x = 0
+    }
+    if (enemyT.y + enemyT.height >= canvas.height){
+        enemyT.y = canvas.height - enemyT.height
+    } else if (enemyT.y <= 0){
+        enemyT.y = 0
+    }
+
     // Physics
     player.xChange = player.xChange * 0.9; // friction 
     player.yChange = player.yChange * 0.9; // friction
@@ -212,6 +285,11 @@ function draw() {
 
     // Player getting hit be the enemy
     if (is_colliding(player, enemy)) {
+        stop("YOU LOSE!");
+        return;
+    }
+
+    if (is_colliding(player, enemyT)) {
         stop("YOU LOSE!");
         return;
     }
@@ -252,6 +330,8 @@ function deactivate(event) {
         moveDown = false;
     }
 }
+// end of keypresses
+
 function load_assets(assets, callback) {
     let num_assets = assets.length;
     let loaded = function() { 
@@ -279,6 +359,7 @@ function randint(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+// player and enemy collisions
 function is_colliding(object1, object2) {
     if (object1.x + object1.width - empty.x < object2.x + empty.x ||
         object2.x + object2.width - empty.x < object1.x + empty.x ||
