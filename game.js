@@ -108,6 +108,14 @@ let empty = {
     y: 4
 };
 
+// defining the timer //
+let subCounter = 0;
+let counter = 0;
+let body = document.querySelector("body");
+let timer = document.createElement("p");
+timer.id = "timer";
+body.appendChild(timer);
+
 function draw() {
     request = window.requestAnimationFrame(draw);
     let now = Date.now();
@@ -143,6 +151,33 @@ function draw() {
         ! (moveLeft && moveRight)) {
             player.frameX = (player.frameX + 1) % 4;
     }
+
+    // // Player attacks
+    // if (attack) {
+    // let attackRadius = 40
+    // let closeX;
+    // let closeY;
+    // if (player.x > enemy.x + enemy.width) {
+    //     closeX = enemy.x + enemy.width
+    // } else if (player.x < enemy.x) {
+    //     closeX = enemy.x
+    // }
+    // if (player.y > enemy.y + enemy.height) {
+    //     closeY = enemy.y + enemy.height
+    // } else if (player.y < enemy.y) {
+    //     closeY = enemy.y
+    // }
+    // let distX = closeX - player.x;
+    // let distY = closeY - player.y;
+    // let distance = Math.sqrt((distX * distX) + (distY * distY));
+
+    // if (distance <= attackRadius) {
+    //     stop("YOU WIN");
+    // }
+    // context.beginPath();
+    // context.arc(player.x + player.width / 2, player.y + player.height / 2, attackRadius, 0, 2*Math.PI);
+    // context.stroke();
+    // }
 
     // Handle key presses
     if (moveLeft) {
@@ -293,6 +328,18 @@ function draw() {
         stop("YOU LOSE!");
         return;
     }
+    
+    // timer //
+    subCounter += 1;
+    if (subCounter >= 30) {
+    subCounter = 0;
+    counter ++;
+    timer.innerHTML = counter;
+    } else if (counter == 67) {
+        stop("You win!")
+    }
+
+
 
 }
 
@@ -300,10 +347,11 @@ function draw() {
 // Activating a key
 function activate(event) {
     let key = event.key;
-    if (event.key == "ArrowLeft" ||
+    if (event.key === "ArrowLeft" ||
         event.key === "ArrowRight"||
         event.key === "ArrowUp" ||
-        event.key === "ArrowDown") {
+        event.key === "ArrowDown" ||
+        event.key === "Shift") {
             event.preventDefault();
         }
     if (key === "ArrowLeft") {
@@ -314,6 +362,8 @@ function activate(event) {
         moveRight = true;
     } else if (key === "ArrowDown") {
         moveDown = true;
+    } else if (key === "shift") {
+        attack = true
     }
 }
 
@@ -328,6 +378,8 @@ function deactivate(event) {
         moveRight = false;
     } else if (key === "ArrowDown") {
         moveDown = false;
+    } else if (key === "shift") {
+        attack = false
     }
 }
 // end of keypresses
