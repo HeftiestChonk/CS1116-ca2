@@ -53,6 +53,7 @@ let moveLeft = false;
 let moveUp = false;
 let moveRight = false;
 let moveDown = false;
+let attack = false;
 
 // Defining an enemy sprite + position
 let enemy = {
@@ -152,32 +153,24 @@ function draw() {
             player.frameX = (player.frameX + 1) % 4;
     }
 
-    // // Player attacks
-    // if (attack) {
-    // let attackRadius = 40
-    // let closeX;
-    // let closeY;
-    // if (player.x > enemy.x + enemy.width) {
-    //     closeX = enemy.x + enemy.width
-    // } else if (player.x < enemy.x) {
-    //     closeX = enemy.x
-    // }
-    // if (player.y > enemy.y + enemy.height) {
-    //     closeY = enemy.y + enemy.height
-    // } else if (player.y < enemy.y) {
-    //     closeY = enemy.y
-    // }
-    // let distX = closeX - player.x;
-    // let distY = closeY - player.y;
-    // let distance = Math.sqrt((distX * distX) + (distY * distY));
+    // Player attacks
+    // regular enemy
+    if (attack) {
+        if(player_attack(player, enemy)) {
+            stop("YOU WIN!");
+            return;
+        }
+        console.log(attack)
+    }
 
-    // if (distance <= attackRadius) {
-    //     stop("YOU WIN");
-    // }
-    // context.beginPath();
-    // context.arc(player.x + player.width / 2, player.y + player.height / 2, attackRadius, 0, 2*Math.PI);
-    // context.stroke();
-    // }
+    // tracking enemy
+    if (attack) {
+        if(player_attack(player, enemyT)) {
+            stop("YOU WIN!");
+            return;
+        }
+    }
+
 
     // Handle key presses
     if (moveLeft) {
@@ -362,7 +355,7 @@ function activate(event) {
         moveRight = true;
     } else if (key === "ArrowDown") {
         moveDown = true;
-    } else if (key === "shift") {
+    } else if (key === "Shift") {
         attack = true
     }
 }
@@ -378,7 +371,7 @@ function deactivate(event) {
         moveRight = false;
     } else if (key === "ArrowDown") {
         moveDown = false;
-    } else if (key === "shift") {
+    } else if (key === "Shift") {
         attack = false
     }
 }
@@ -421,6 +414,35 @@ function is_colliding(object1, object2) {
         } else {
             return true;
         }
+}
+
+// player attack
+function player_attack(object1, object2) {
+    let attackRadius = 40
+    let centerCircleX = object1.x + (object1.width / 2);
+    let centerCircleY = object1.y + (object1.height / 2);
+    let closeX = object1.x;
+    let closeY = object1.y;
+    if (centerCircleX > object2.x + object2.width) {
+        closeX = object2.x + object2.width
+    } else if (centerCircleX < object2.x) {
+        closeX = object2.x
+    }
+    if (centerCircleY > object2.y + object2.height) {
+        closeY = object2.y + object2.height
+    } else if (centerCircleY < object2.y) {
+        closeY = object2.y
+    }
+    let distX = closeX - centerCircleX;
+    let distY = closeY - centerCircleY;
+    let distance = Math.sqrt((distX * distX) + (distY * distY));
+
+    if (distance <= attackRadius) {
+        stop("YOU WIN");
+    }
+    context.beginPath();
+    context.arc(player.x + player.width / 2, player.y + player.height / 2, attackRadius, 0, 2*Math.PI);
+    context.stroke();
 }
 
 function stop(outcome) {
