@@ -109,6 +109,8 @@ let empty = {
     y: 4
 };
 
+let reset = false
+
 // defining the timer //
 let subCounter = 0;
 let counter = 0;
@@ -321,6 +323,11 @@ function draw() {
         stop("YOU LOSE!");
         return;
     }
+
+    // resetting
+    if (reset) {
+        location.reload()
+    }
     
     // timer //
     subCounter += 1;
@@ -331,10 +338,8 @@ function draw() {
     } else if (counter == 67) {
         stop("You win!")
     }
-
-
-
 }
+// End of draw
 
 // Key presses
 // Activating a key
@@ -344,7 +349,8 @@ function activate(event) {
         event.key === "ArrowRight"||
         event.key === "ArrowUp" ||
         event.key === "ArrowDown" ||
-        event.key === "Shift") {
+        event.key === "Shift" ||
+        event.key === "r") {
             event.preventDefault();
         }
     if (key === "ArrowLeft") {
@@ -357,6 +363,8 @@ function activate(event) {
         moveDown = true;
     } else if (key === "Shift") {
         attack = true
+    } else if (key === "r") {
+        reset = true
     }
 }
 
@@ -373,6 +381,8 @@ function deactivate(event) {
         moveDown = false;
     } else if (key === "Shift") {
         attack = false
+    } else if (key === "r") {
+        reset = false
     }
 }
 // end of keypresses
