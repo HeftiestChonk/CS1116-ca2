@@ -419,18 +419,19 @@ function is_colliding(object1, object2) {
 // player attack
 function player_attack(object1, object2) {
     let attackRadius = 40
+    // using the center of the sprite instead of the top left
     let centerCircleX = object1.x + (object1.width / 2);
     let centerCircleY = object1.y + (object1.height / 2);
     let closeX = object1.x;
     let closeY = object1.y;
-    if (centerCircleX > object2.x + object2.width) {
+    if (centerCircleX > object2.x + object2.width - empty.x) {
         closeX = object2.x + object2.width
-    } else if (centerCircleX < object2.x) {
+    } else if (centerCircleX < object2.x + empty.x) {
         closeX = object2.x
     }
-    if (centerCircleY > object2.y + object2.height) {
+    if (centerCircleY > object2.y + object2.height - empty.y) {
         closeY = object2.y + object2.height
-    } else if (centerCircleY < object2.y) {
+    } else if (centerCircleY < object2.y + empty.y) {
         closeY = object2.y
     }
     let distX = closeX - centerCircleX;
