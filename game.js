@@ -350,7 +350,11 @@ function activate(event) {
         event.key === "ArrowUp" ||
         event.key === "ArrowDown" ||
         event.key === "Shift" ||
-        event.key === "r") {
+        event.key === "r" ||
+        event.key === "w" ||
+        event.key === "a" ||
+        event.key === "s" ||
+        event.key === "d") {
             event.preventDefault();
         }
     if (key === "ArrowLeft") {
@@ -365,6 +369,14 @@ function activate(event) {
         attack = true
     } else if (key === "r") {
         reset = true
+    } else if (key === "a") {
+        moveLeft = true;
+    } else if (key === "w") {
+        moveUp = true;
+    } else if (key === "d") {
+        moveRight = true;
+    } else if (key === "s") {
+        moveDown = true;
     }
 }
 
@@ -383,6 +395,14 @@ function deactivate(event) {
         attack = false
     } else if (key === "r") {
         reset = false
+    } else if (key === "a") {
+        moveLeft = false;
+    } else if (key === "w") {
+        moveUp = false;
+    } else if (key === "d") {
+        moveRight = false;
+    } else if (key === "s") {
+        moveDown = false;
     }
 }
 // end of keypresses
