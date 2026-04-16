@@ -56,19 +56,11 @@ let moveDown = false;
 let attack = false;
 
 // Defining an enemy sprite + position
-let enemy = {
-    x: randint(30, 492),
-    y: randint(30, 290),
-    width: 24,
-    height: 24,
-    frameX: 0,
-    frameY: 0,
-    xChange: randint(-5, 5),
-    yChange: randint(-5, 5),
-};
+let enemies = []
 
 let enemyImage1 = new Image();
 
+let Tenemies = []
 // Defining a tracking enemy
 let enemyT = {
     x: randint(30, 492),
@@ -198,102 +190,150 @@ function draw() {
 
     // Draw Enemies
     // Draw straight line enemy
-    context.drawImage(enemyImage1,
-        enemy.frameX * enemy.width, enemy.frameY * enemy.height, enemy.width, enemy.height, 
-        enemy.x, enemy.y, enemy.width, enemy.height);
+    if (enemies.length < 5) {
+        let enemy = {
+            x: randint(30, 492),
+            y: randint(30, 290),
+            width: 24,
+            height: 24,
+            frameX: 0,
+            frameY: 0,
+            xChange: randint(-5, 5),
+            yChange: randint(-5, 5),
+        };
+        enemies.push(enemy);
+    }
+    for (let enemy of enemies) {
+        context.drawImage(enemyImage1,
+            enemy.frameX * enemy.width, enemy.frameY * enemy.height, enemy.width, enemy.height, 
+            enemy.x, enemy.y, enemy.width, enemy.height);
+    }
 
     // enemy movement
-    if (enemy.x + enemy.width >= canvas.width){
-        enemy.xChange = enemy.xChange * (-1)
-    } else if (enemy.x <= 0){
-        enemy.xChange = enemy.xChange * (-1)
-    }
-    if (enemy.y+enemy.height >= canvas.height){
-        enemy.yChange = enemy.yChange * (-1)
-    } else if (enemy.y <= 0){
-        enemy.yChange = enemy.yChange * (-1)
+    for (let enemy of enemies) {
+        if (enemy.x + enemy.width >= canvas.width){
+            enemy.xChange = enemy.xChange * (-1)
+        } else if (enemy.x <= 0){
+            enemy.xChange = enemy.xChange * (-1)
+        }
+        if (enemy.y+enemy.height >= canvas.height){
+            enemy.yChange = enemy.yChange * (-1)
+        } else if (enemy.y <= 0){
+            enemy.yChange = enemy.yChange * (-1)
+        }
     }
 
     // changing the direction the enemy faces
     // Left
-    if (enemy.xChange < 0) {
-        enemy.frameY = 1;
+    for (let enemy of enemies){
+        if (enemy.xChange < 0) {
+            enemy.frameY = 1;
+        }
+        // Right
+        if (enemy.xChange > 0) {
+            enemy.frameY = 2;
+        }
+        // Up
+        if (enemy.yChange < 0) {
+            enemy.frameY = 3
+        }
+        // Down
+        if (enemy.yChange > 0) {
+            enemy.frameY = 0
+        }
     }
-    // Right
-    if (enemy.xChange > 0) {
-        enemy.frameY = 2;
-    }
-    // Up
-    if (enemy.yChange < 0) {
-        enemy.frameY = 3
-    }
-    // Down
-    if (enemy.yChange > 0) {
-        enemy.frameY = 0
-    }
-
+    for (let enemy of enemies) {
     enemy.frameX = (enemy.frameX + 1) % 4;
+    }
 
     // Update the enemy
+    for (let enemy of enemies) {
     enemy.x = enemy.x + enemy.xChange;
     enemy.y = enemy.y + enemy.yChange;
+    }
 
     // Draw tracking enemy
-    context.drawImage(enemyImage2,
-        enemyT.frameX * enemyT.width, enemyT.frameY * enemyT.height, enemyT.width, enemyT.height, 
-        enemyT.x, enemyT.y, enemyT.width, enemyT.height);
+    if (Tenemies.length < 5) {
+        let enemyT = {
+        x: randint(30, 492),
+        y: randint(30, 300),
+        width: 24,
+        height: 24,
+        frameX: 0,
+        frameY: 0,
+        xChange: 0,
+        yChange: 0,
+        };
+        Tenemies.push(enemyT)
+    }
+    for (let enemyT of Tenemies) {
+        context.drawImage(enemyImage2,
+            enemyT.frameX * enemyT.width, enemyT.frameY * enemyT.height, enemyT.width, enemyT.height, 
+            enemyT.x, enemyT.y, enemyT.width, enemyT.height);
+    }
 
     // Tracking enemy movement
-    if (player.x > enemyT.x){
-        enemyT.xChange = 1;
-    } else if (player.x < enemyT.x){
-        enemyT.xChange = -1;
-    } else if (player.x === enemyT.x){
-        enemyT.xChange = 0
-    }
-    if (player.y > enemyT.y){
-        enemyT.yChange = 1;
-    } else if (player.y < enemyT.y){
-        enemyT.yChange = -1;
-    } else if (player.y === enemyT.y){
-        enemyT.yChange = 0
+    for (let enemyT of Tenemies) {
+        if (player.x > enemyT.x){
+            enemyT.xChange = 1;
+        } else if (player.x < enemyT.x){
+            enemyT.xChange = -1;
+        } else if (player.x === enemyT.x){
+            enemyT.xChange = 0
+        }
+        if (player.y > enemyT.y){
+            enemyT.yChange = 1;
+        } else if (player.y < enemyT.y){
+            enemyT.yChange = -1;
+        } else if (player.y === enemyT.y){
+            enemyT.yChange = 0
+        }
     }
 
     // changing the direction the enemy faces
-    // Left
-    if (enemyT.xChange < 0) {
-        enemyT.frameY = 1;
+    for (let enemyT of Tenemies) {
+        // Left
+        if (enemyT.xChange < 0) {
+            enemyT.frameY = 1;
+        }
+        // Right
+        if (enemyT.xChange > 0) {
+            enemyT.frameY = 2;
+        }
+        // Up
+        if (enemyT.yChange < 0) {
+            enemyT.frameY = 3
+        }
+        // Down
+        if (enemyT.yChange > 0) {
+            enemyT.frameY = 0
+        }
     }
-    // Right
-    if (enemyT.xChange > 0) {
-        enemyT.frameY = 2;
+    
+    for (let enemyT of Tenemies) {
+        enemyT.frameX = (enemyT.frameX + 1) % 4;
     }
-    // Up
-    if (enemyT.yChange < 0) {
-        enemyT.frameY = 3
-    }
-    // Down
-    if (enemyT.yChange > 0) {
-        enemyT.frameY = 0
-    }
-
-    enemyT.frameX = (enemyT.frameX + 1) % 4;
 
     // Update the enemy
-    enemyT.x = enemyT.x + enemyT.xChange;
-    enemyT.y = enemyT.y + enemyT.yChange;
+    for (let enemyT of Tenemies) {
+        enemyT.x = enemyT.x + enemyT.xChange;
+        enemyT.y = enemyT.y + enemyT.yChange;
+    }
 
     // Tracking enemy colliding with a wall
-    if (enemyT.x + enemyT.width >= canvas.width){
-        enemyT.x = canvas.width - enemyT.width
-    } else if (enemyT.x <= 0){
-        enemyT.x = 0
+    for (let enemyT of Tenemies) {
+        if (enemyT.x + enemyT.width >= canvas.width){
+            enemyT.x = canvas.width - enemyT.width
+        } else if (enemyT.x <= 0){
+            enemyT.x = 0
+        }
+        if (enemyT.y + enemyT.height >= canvas.height){
+            enemyT.y = canvas.height - enemyT.height
+        } else if (enemyT.y <= 0){
+            enemyT.y = 0
+        }
     }
-    if (enemyT.y + enemyT.height >= canvas.height){
-        enemyT.y = canvas.height - enemyT.height
-    } else if (enemyT.y <= 0){
-        enemyT.y = 0
-    }
+
 
     // Physics
     player.xChange = player.xChange * 0.9; // friction 
@@ -314,14 +354,18 @@ function draw() {
     }
 
     // Player getting hit be the enemy
-    if (is_colliding(player, enemy)) {
-        stop("YOU LOSE!");
-        return;
+    for (let enemy of enemies) {
+        if (is_colliding(player, enemy)) {
+            stop("YOU LOSE!");
+            return;
+        }
     }
 
-    if (is_colliding(player, enemyT)) {
-        stop("YOU LOSE!");
-        return;
+    for (let enemyT of Tenemies) {
+        if (is_colliding(player, enemyT)) {
+            stop("YOU LOSE!");
+            return;
+        }
     }
 
     // resetting
@@ -339,7 +383,7 @@ function draw() {
         stop("You win!")
     }
 }
-// End of draw
+// End of draw function
 
 // Key presses
 // Activating a key
