@@ -1,6 +1,8 @@
 // Tileset is from https://pixel-poem.itch.io/dungeon-assetpuck
 // Sprites are from https://zerie.itch.io/tiny-rpg-character-asset-pack
 
+let kills = 0
+
 let canvas;
 let context;
 
@@ -35,7 +37,7 @@ let background = [
 [40,52,52,52,52,52,52,52,52,52,52,52,52,52,52,52,52,52,52,52,52,52,52,52,52,52,52,52,52,52,52,45]
 ]
 
-// Defining a player sprite + position
+// Defining a player sprite + position + health
 let player = {
     x: 0,
     y: 0,
@@ -47,6 +49,12 @@ let player = {
     yChange : 0,
 };
 
+let playerHealth = 100;
+
+let hBarWidth = 512;
+let hBarHeight = 10;
+let damage = 512 / playerHealth;
+
 let playerImage = new Image();
 
 let moveLeft = false;
@@ -55,23 +63,12 @@ let moveRight = false;
 let moveDown = false;
 let attack = false;
 
-// Defining an enemy sprite + position
+// Defining enemy sprite lists + images 
 let enemies = []
 
 let enemyImage1 = new Image();
 
 let Tenemies = []
-// Defining a tracking enemy
-let enemyT = {
-    x: randint(30, 492),
-    y: randint(30, 300),
-    width: 24,
-    height: 24,
-    frameX: 0,
-    frameY: 0,
-    xChange: 0,
-    yChange: 0,
-};
 
 let enemyImage2 = new Image();
 
@@ -95,21 +92,21 @@ function init() {
         {"var": backgroundImage, "url": "Dungeon_Tileset.png"}], draw); // Background tileset
 }
 
-// defining the empty space in the sprites
+// Defining the empty space in the sprites
 let empty = {
     x: 6,
     y: 4
 };
 
-let reset = false
-
-// defining the timer //
+// Defining the timer //
 let subCounter = 0;
 let counter = 0;
 let body = document.querySelector("body");
 let timer = document.createElement("p");
 timer.id = "timer";
 body.appendChild(timer);
+
+let reset = false
 
 function draw() {
     request = window.requestAnimationFrame(draw);
@@ -147,26 +144,33 @@ function draw() {
             player.frameX = (player.frameX + 1) % 4;
     }
 
-    // Player attacks
-    // regular enemy
+    // Player attacks //
+    // Regular enemy
     if (attack) {
-        if(player_attack(player, enemy)) {
-            stop("YOU WIN!");
-            return;
-        }
-        console.log(attack)
-    }
-
-    // tracking enemy
-    if (attack) {
-        if(player_attack(player, enemyT)) {
-            stop("YOU WIN!");
-            return;
+        for (let enemy of enemies) {
+            if(player_attack(player, enemy)) {
+                enemy.x = -100
+                enemy.y = -100
+                enemy.yChange = 0
+                enemy.xChange = 0
+            }
         }
     }
 
+    // Tracking enemy
+    if (attack) {
+        for (let enemyT of Tenemies) {
+            if(player_attack(player, enemyT)) {
+                enemyT.x = -100
+                enemyT.y = -100
+                enemyT.yChange = 0
+                enemyT.xChange = 0
+            }
+        }
+    }
 
-    // Handle key presses
+
+    // Key presses
     if (moveLeft) {
         player.xChange = player.xChange - 0.5;
         player.frameY = 1;
@@ -184,11 +188,11 @@ function draw() {
         player.frameY = 0
     }
 
-    // Update the player
+    // Update the player movement
     player.x = player.x + player.xChange;
     player.y = player.y + player.yChange;
 
-    // Draw Enemies
+    // Draw Enemies //
     // Draw straight line enemy
     if (enemies.length < 5) {
         let enemy = {
@@ -203,13 +207,14 @@ function draw() {
         };
         enemies.push(enemy);
     }
+    // Drawing the sprite of the enemy
     for (let enemy of enemies) {
         context.drawImage(enemyImage1,
             enemy.frameX * enemy.width, enemy.frameY * enemy.height, enemy.width, enemy.height, 
             enemy.x, enemy.y, enemy.width, enemy.height);
     }
 
-    // enemy movement
+    // Enemy movement
     for (let enemy of enemies) {
         if (enemy.x + enemy.width >= canvas.width){
             enemy.xChange = enemy.xChange * (-1)
@@ -223,9 +228,9 @@ function draw() {
         }
     }
 
-    // changing the direction the enemy faces
-    // Left
+    // Changing the direction the enemy faces
     for (let enemy of enemies){
+        // Left
         if (enemy.xChange < 0) {
             enemy.frameY = 1;
         }
@@ -266,6 +271,7 @@ function draw() {
         };
         Tenemies.push(enemyT)
     }
+    // Tracking enemy sprite
     for (let enemyT of Tenemies) {
         context.drawImage(enemyImage2,
             enemyT.frameX * enemyT.width, enemyT.frameY * enemyT.height, enemyT.width, enemyT.height, 
@@ -290,7 +296,7 @@ function draw() {
         }
     }
 
-    // changing the direction the enemy faces
+    // Changing the direction the enemy faces
     for (let enemyT of Tenemies) {
         // Left
         if (enemyT.xChange < 0) {
@@ -347,45 +353,63 @@ function draw() {
     } else if (player.x <= 0){
         player.x = 0
     }
-    if (player.y + player.height >= canvas.height){
-        player.y = canvas.height - player.height
+    if (player.y + player.height >= canvas.height - hBarHeight){
+        player.y = canvas.height - hBarHeight - player.height
     } else if (player.y <= 0){
         player.y = 0
     }
 
     // Player getting hit be the enemy
-    for (let enemy of enemies) {
-        if (is_colliding(player, enemy)) {
-            stop("YOU LOSE!");
-            return;
+    if (subCounter / 30 === 0 ) {
+        for (let enemy of enemies) {
+            if (is_colliding(player, enemy)) {
+                playerHealth -= 1;
+                hBarWidth -= damage;
+            }
+        }
+
+        for (let enemyT of Tenemies) {
+            if (is_colliding(player, enemyT)) {
+                playerHealth -= 1;
+                hBarWidth -= damage;
+            }
         }
     }
 
-    for (let enemyT of Tenemies) {
-        if (is_colliding(player, enemyT)) {
-            stop("YOU LOSE!");
-            return;
-        }
-    }
-
-    // resetting
+    // Resetting
     if (reset) {
         location.reload()
     }
     
-    // timer //
+    // Timer //
     subCounter += 1;
     if (subCounter >= 30) {
     subCounter = 0;
     counter ++;
     timer.innerHTML = counter;
-    } else if (counter == 67) {
+    } else if (counter == 60) {
         stop("You win!")
     }
+    
+    // Player health
+    if (playerHealth <= 0) {
+        stop("You Lose!!");
+    }
+    if (playerHealth <= 0) {
+        playerHealth = 0
+    }
+    // Drawing the health bar
+    if (playerHealth < 5) {
+        context.fillStyle = "red";
+    } else {
+        context.fillStyle = "green";
+    }
+    context.fillRect(0, canvas.height - hBarHeight, hBarWidth, hBarHeight)
 }
 // End of draw function
 
-// Key presses
+// Key presses //
+
 // Activating a key
 function activate(event) {
     let key = event.key;
@@ -449,7 +473,7 @@ function deactivate(event) {
         moveDown = false;
     }
 }
-// end of keypresses
+// End of keypresses //
 
 function load_assets(assets, callback) {
     let num_assets = assets.length;
@@ -478,7 +502,7 @@ function randint(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-// player and enemy collisions
+// Player and enemy collisions
 function is_colliding(object1, object2) {
     if (object1.x + object1.width - empty.x < object2.x + empty.x ||
         object2.x + object2.width - empty.x < object1.x + empty.x ||
@@ -490,10 +514,10 @@ function is_colliding(object1, object2) {
         }
 }
 
-// player attack
+// Player attack
 function player_attack(object1, object2) {
     let attackRadius = 40
-    // using the center of the sprite instead of the top left
+    // Using the center of the sprite instead of the top left
     let centerCircleX = object1.x + (object1.width / 2);
     let centerCircleY = object1.y + (object1.height / 2);
     let closeX = object1.x;
@@ -513,10 +537,13 @@ function player_attack(object1, object2) {
     let distance = Math.sqrt((distX * distX) + (distY * distY));
 
     if (distance <= attackRadius) {
-        stop("YOU WIN");
+        kills += 1
+        return true;
     }
+    // Drawing the circle around the player
     context.beginPath();
     context.arc(player.x + player.width / 2, player.y + player.height / 2, attackRadius, 0, 2*Math.PI);
+    context.strokeStyle = "blue";
     context.stroke();
 }
 
