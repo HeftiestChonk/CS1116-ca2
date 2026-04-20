@@ -1,7 +1,6 @@
 // Tileset is from https://pixel-poem.itch.io/dungeon-assetpuck
 // Sprites are from https://zerie.itch.io/tiny-rpg-character-asset-pack
-
-let kills = 0
+// Background image taken from https://www.freepik.com/free-vector/dark-cave-landscape_2722247.htm#fromView=search&page=1&position=0&uuid=7fd5914f-7157-495f-9588-686314aee014&query=Pixel+art+underground+cave
 
 let canvas;
 let context;
@@ -37,7 +36,7 @@ let background = [
 [40,52,52,52,52,52,52,52,52,52,52,52,52,52,52,52,52,52,52,52,52,52,52,52,52,52,52,52,52,52,52,45]
 ]
 
-// Defining a player sprite + position + health
+// Defining the player
 let player = {
     x: 0,
     y: 0,
@@ -62,6 +61,9 @@ let moveUp = false;
 let moveRight = false;
 let moveDown = false;
 let attack = false;
+
+let kills = 0
+
 
 // Defining enemy sprite lists + images 
 let enemies = []
@@ -101,12 +103,20 @@ let empty = {
 // Defining the timer //
 let subCounter = 0;
 let counter = 0;
-let body = document.querySelector("body");
+let timeID = document.querySelector("#timer");
 let timer = document.createElement("p");
 timer.id = "timer";
-body.appendChild(timer);
+timeID.appendChild(timer);
 
-let reset = false
+// Attack timer + Duration
+let attackTimer = 0
+let attackDuration = 0
+
+// Adding the timer to the html
+let killID = document.querySelector("#kill")
+let eliminations = document.createElement("p");
+eliminations.id = "killCount"
+killID.appendChild(eliminations)
 
 function draw() {
     request = window.requestAnimationFrame(draw);
@@ -145,31 +155,37 @@ function draw() {
     }
 
     // Player attacks //
-    // Regular enemy
-    if (attack) {
-        for (let enemy of enemies) {
-            if(player_attack(player, enemy)) {
-                enemy.x = -100
-                enemy.y = -100
-                enemy.yChange = 0
-                enemy.xChange = 0
+
+    // Attack cooldown
+    attackTimer ++
+    if (attackTimer >= 60) {
+        
+        if (attack) {
+        // Regular enemy
+            for (let enemy of enemies) {
+                if(player_attack(player, enemy)) {
+                    enemy.x = randint(50, canvas.width - 50);
+                    enemy.y = randint(50, canvas.height - 50);
+                    enemy.yChange = randint(-5, 5);
+                    enemy.xChange = randint(-5, 5);
+                }
             }
-        }
-    }
-
-    // Tracking enemy
-    if (attack) {
-        for (let enemyT of Tenemies) {
-            if(player_attack(player, enemyT)) {
-                enemyT.x = -100
-                enemyT.y = -100
-                enemyT.yChange = 0
-                enemyT.xChange = 0
+        // Tracking enemy
+            for (let enemyT of Tenemies) {
+                if(player_attack(player, enemyT)) {
+                    enemyT.x = randint(50, canvas.width - 50);
+                    enemyT.y = randint(50, canvas.height - 50);
+                    enemyT.yChange = 0;
+                    enemyT.xChange = 0;
+                }
             }
+            attackTimer = 0;
         }
-    }
+        }
+        
 
 
+    console.log(attackTimer)
     // Key presses
     if (moveLeft) {
         player.xChange = player.xChange - 0.5;
@@ -376,9 +392,10 @@ function draw() {
         }
     }
 
-    // Resetting
-    if (reset) {
-        location.reload()
+    // Winning by killing enemies
+    eliminations.innerHTML = kills;
+    if (kills >= 50) {
+        stop("YOU WIN!")
     }
     
     // Timer //
@@ -388,12 +405,12 @@ function draw() {
     counter ++;
     timer.innerHTML = counter;
     } else if (counter == 60) {
-        stop("You win!")
+        stop("YOU WIN!")
     }
     
     // Player health
     if (playerHealth <= 0) {
-        stop("You Lose!!");
+        stop("YOU LOSE!");
     }
     if (playerHealth <= 0) {
         playerHealth = 0
@@ -418,59 +435,42 @@ function activate(event) {
         event.key === "ArrowUp" ||
         event.key === "ArrowDown" ||
         event.key === "Shift" ||
-        event.key === "r" ||
         event.key === "w" ||
         event.key === "a" ||
         event.key === "s" ||
-        event.key === "d") {
+        event.key === "d" ||
+        event.key === "W" ||
+        event.key === "A" ||
+        event.key === "S" ||
+        event.key === "D") {
             event.preventDefault();
         }
-    if (key === "ArrowLeft") {
+    if (key === "ArrowLeft" || key === "a" || key === "A") {
         moveLeft = true;
-    } else if (key === "ArrowUp") {
+    } else if (key === "ArrowUp" || key === "w" || key === "W") {
         moveUp = true;
-    } else if (key === "ArrowRight") {
+    } else if (key === "ArrowRight" || key === "d" || key === "D") {
         moveRight = true;
-    } else if (key === "ArrowDown") {
+    } else if (key === "ArrowDown" || key === "s" || key === "S") {
         moveDown = true;
     } else if (key === "Shift") {
-        attack = true
-    } else if (key === "r") {
-        reset = true
-    } else if (key === "a") {
-        moveLeft = true;
-    } else if (key === "w") {
-        moveUp = true;
-    } else if (key === "d") {
-        moveRight = true;
-    } else if (key === "s") {
-        moveDown = true;
+        attack = true;
     }
 }
 
 // Deactivating a key
 function deactivate(event) {
     let key = event.key;
-    if (key === "ArrowLeft") {
+    if (key === "ArrowLeft" || key === "a" || key === "A") {
         moveLeft = false;
-    } else if (key === "ArrowUp") {
+    } else if (key === "ArrowUp" || key === "w" || key === "W") {
         moveUp = false;
-    } else if (key === "ArrowRight") {
+    } else if (key === "ArrowRight" || key === "d" || key === "D") {
         moveRight = false;
-    } else if (key === "ArrowDown") {
+    } else if (key === "ArrowDown" || key === "s" || key === "S") {
         moveDown = false;
     } else if (key === "Shift") {
-        attack = false
-    } else if (key === "r") {
-        reset = false
-    } else if (key === "a") {
-        moveLeft = false;
-    } else if (key === "w") {
-        moveUp = false;
-    } else if (key === "d") {
-        moveRight = false;
-    } else if (key === "s") {
-        moveDown = false;
+        attack = false;
     }
 }
 // End of keypresses //
@@ -551,7 +551,7 @@ function stop(outcome) {
     window.cancelAnimationFrame(request);
     window.removeEventListener("keydown", activate);
     window.removeEventListener("keyup", deactivate);
-    let body = document.querySelector("body");
+    let body = document.querySelector("#info");
     let endCondition = document.createElement("p");
     endCondition.innerHTML = outcome;
     endCondition.id = "endCondition";

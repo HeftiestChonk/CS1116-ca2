@@ -1,0 +1,41 @@
+html {
+    background-image: url("16279.jpg");
+    background-size: cover;
+    background-position: center;
+    min-height: 100%;
+}
+
+body {
+    max-width: 40em;
+    margin: 4em auto;
+    padding: 2em;
+    background-color: orange;
+    border-radius: 1em;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 0.25em;
+}
+
+h2 {
+    text-align: center;
+    margin-top: 0;
+    color: #555;
+}
+
+ul {
+    font-size: 1.1em;
+    line-height: 2em;
+}
+
+a {
+    color: blue;
+    font-weight: bold;
+    font-size: 1.2em;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}

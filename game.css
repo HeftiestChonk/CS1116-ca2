@@ -1,12 +1,36 @@
-canvas {
-    background-color: black;
-    display: block;
-    margin: 1em auto;
-    width: 80%;
+html {
+    background-image: url("16279.jpg");
 }
 
-#endCondition{
+body {
+    display: grid;
+    grid-template-columns: 4fr 1fr;
+    grid-template-areas: "canvas info";
+    gap: 1em;
+    padding: 1em;
+}
+
+canvas {
+    grid-area: canvas;
+    background-color: black;
+    display: block;
+    width: 100%;
+}
+
+#info {
+    grid-area: info;
+    background-color: orange;
+    border-radius: 2em;
+    padding: 2em;
+    margin-bottom: auto;
+}
+
+#endCondition {
     color: red;
     text-align: center;
     font-size: 2em;
+}
+
+#info h2 {
+    text-align: center;
 }
